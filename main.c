@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "syntax_tree.h"
+#include "semantic.h"
 extern int yyparse();
 extern int yyrestart();
 int error_num = 0;
@@ -12,8 +13,11 @@ int main(int argc, char **argv){
         }
         yyrestart(f);
         yyparse();
-        if(1)
-            print_tree();
+        if(error_num == 0){
+            //print_tree();
+            semantic_func();
+        }
+
     }
     return 0;
 }

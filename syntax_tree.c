@@ -5,11 +5,13 @@
 #include <string.h>
 int space_num = 0;
 
+
 Node *new_node(int line, char *nodeName, int type, void *val){
     Node *node = malloc(sizeof(Node));
     node->line = line;
     node->child_num = 0;
     node->type = type;
+    node->visited = 0;
     node->name = malloc(strlen(nodeName) + 1);
     strcpy(node->name, nodeName);
     for(int i = 0; i < MAX_CHILD; i++){
