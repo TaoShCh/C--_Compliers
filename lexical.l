@@ -137,7 +137,9 @@ letter [_a-zA-Z]
     return ASSIGNOP;
 }
 ">"|"<"|">="|"<="|"=="|"!=" {
-    yylval.node = new_node(yylineno, "RELOP", RELOP, NULL);
+    char s[3] = "";
+    strcpy(s, yytext);
+    yylval.node = new_node(yylineno, "RELOP", RELOP, s);
     //printf("RELOP ");    
     return RELOP;
 }

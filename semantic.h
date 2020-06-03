@@ -43,6 +43,7 @@ struct _Var_hash_node
     int lineno;
     int depth;
     Type *type;
+    struct _Operand *op;
     Var_hash_node *next;
     Var_hash_node *last;
 };
@@ -50,6 +51,7 @@ struct _Var_hash_node
 struct _Type_node{
     Type *type;
     Type_node *next;
+    char *name;
 };
 
 struct _Func_hash_node{
@@ -77,7 +79,11 @@ struct _Var_list_stack{
 
 Var_list_stack my_stack[MAX_DEPTH];
 
-void semantic_func();
+typedef struct _Node Node;
 
+void semantic_func();
+Var_hash_node* get_var_hash_node(char *key);
+Func_hash_node* get_func_hash_node(char *key);
+Type *get_exp_type(Node *node);
 #endif
 

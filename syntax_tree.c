@@ -11,7 +11,7 @@ Node *new_node(int line, char *nodeName, int type, void *val){
     node->line = line;
     node->child_num = 0;
     node->type = type;
-    node->visited = 0;
+    node->visited = node->code_visited = 0;
     node->name = malloc(strlen(nodeName) + 1);
     strcpy(node->name, nodeName);
     for(int i = 0; i < MAX_CHILD; i++){
@@ -23,7 +23,7 @@ Node *new_node(int line, char *nodeName, int type, void *val){
     else if(type == FLOAT){
         node->val.f = *(float *)val;
     }
-    else if(type == ID || type == TYPE){
+    else if(type == ID || type == TYPE || type == RELOP){
         node->val.s = malloc(strlen(val) + 1);
         strcpy(node->val.s, val);
     }

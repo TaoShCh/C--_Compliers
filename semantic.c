@@ -1,6 +1,7 @@
 #include "semantic.h"
 #include "syntax_tree.h"
 #include "syntax.tab.h"
+#include "intercode.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -119,7 +120,7 @@ void table_init(){
     }
 }
 
-void node_type_check(Node *node, char *correct_name){
+static void node_type_check(Node *node, char *correct_name){
     if(node == NULL)
         printf("Error: %s NULL node\n", correct_name);
     //printf("%s\n", node->name);
@@ -241,6 +242,7 @@ void insert_to_val_table(char *name, int line, Type *type){
     node->lineno = line;
     node->type = type;
     node->depth = cur_depth;
+    node->op = NULL;
     if(var_hash_table[i] == NULL){
         var_hash_table[i] = node;
     }
@@ -311,7 +313,7 @@ Node* get_id_node(Node *Vardec){
     return tmp;
 }
 
-Type* get_id_type(Node *Vardec, Type *basic_type){
+static Type* get_id_type(Node *Vardec, Type *basic_type){
     node_type_check(Vardec, "VarDec");
     Type *ans = basic_type;
     while(Vardec->child_num == 4){
@@ -389,7 +391,7 @@ Type* get_exp_type(Node* node){
             if(tmp == NULL){
                 semantic_error(1, node->line, node->child[0]->val.s);
                 return NULL;
-            }
+            } 
             return tmp->type;
         }
         else if(node->child[0]->type == FLOAT){
@@ -429,7 +431,7 @@ Type* get_exp_type(Node* node){
                     return new_type(INT_TYPE);
                 }
             }
-            else if(oper == RELOP){
+            else if(oper == RELOP){ 
                 if(type_equal(type1, type2)){
                     return new_type(INT_TYPE);
                 }
@@ -633,10 +635,12 @@ Type* handle_Specifier(Node *node){
 Type_node* handle_ParamDec(Node *node){
     node_type_check(node, "ParamDec");
     Type *type = handle_Specifier(node->child[0]);
-    handle_VarDec(node->child[1], type);
+    type = handle_VarDec(node->child[1], type);
     Type_node* type_node = malloc(sizeof(Type_node));
+    Node *ID = get_id_node(node->child[1]);
     type_node->type = type;
     type_node->next = NULL;
+    type_node->name = ID->val.s;
     return type_node;
 }
 
@@ -773,7 +777,7 @@ void handle_CompSt(Node *node, Type *correct_type, int func_flag){
         handle_Stmt(StmtList->child[0], correct_type);
         StmtList = StmtList->child[1];
     }
-    delete_stack();
+    //delete_stack();
 }
 
 void handle_Stmt(Node *node, Type *correct_type){
@@ -814,7 +818,7 @@ void add_var(Node *node){
     }
 }
 
-void tree_search(Node *node){
+static void tree_search(Node *node){
     if(node == NULL || node->visited == 1) return;
     add_var(node);
     for(int i = 0; i < node->child_num; i++){
@@ -907,8 +911,18 @@ void func_table_check(){
         }
     }
 }
+
+void func_tabel_init(){
+    Type_node *write_para = malloc(sizeof(Type_node));
+    write_para->next = NULL;
+    write_para->type = new_type(INT_TYPE);
+    insert_to_func_table("read", 0, new_type(INT_TYPE), NULL, 1);
+    insert_to_func_table("write", 0, new_type(INT_TYPE), write_para, 1);
+}
+
 void semantic_func(){
     table_init();
+    func_tabel_init();
     tree_search(root);
     //print_var_table();
     //print_func_table();
